@@ -1,0 +1,142 @@
+Message Queue Nedir?
+Message Queue , yazýlým sistemlerinde iletiþim için kullanýlan bir yapýdýr.
+Birbirinden baðýmsýz sistemler arasýnda veri alýþveriþi yapmak için kullanýlýr.	
+Message Queue , gönderilen mesajlarý kuyrukta saklar ve sonradan bu mesajlarýn iþlenmesini saðlar.
+Kuyruða mesaj gönderenlere Producer(Yayýncý) ya da Publisher denir. Kuyruktaki mesajlarý iþleyene ise Consumer(Tüketici) denir.
+
+Message Broker Nedir?
+Message Queue yapýsýný kullanan sistemlerde mesajlarýn alýnmasý, iþlenmesi ve gönderilmesi iþlemlerini yöneten yazýlýmlara Message Broker denir. Örneðin RabbitMQ, Kafka, ActiveMQ gibi yazýlýmlar birer Message Broker’dýr.Publisher/Producer ve Consumer arasýnda iletiþimi saðlar.  
+
+
+
+Exchange Nedir?
+Publisher tarafýndan gönderilen mesajlarýn nasýl yönetileceðini ve hangi route'lara yönlendirileceðini belirlememiz konusunda kontrol saðlayan/karar veren yapýdýr.
+
+Route ise mesajlarýn exchange üzerinden kuyruklara nasýl göndereceðini tanýmlayan mekanizmadýr.
+
+Publisheer -> Exchange -> Route -> Queue -> Consumer þeklinde bir akýþ vardýr.
+
+Eðer istenirse bir exchange'e birden fazla kuyruk baðlanabilir. Bu durumda mesajýn exchangeden hangi kuyruða gönderileceði route'lara göre belirlenir.
+
+
+
+Binding Nedir?
+
+Exchange ve Queue arasýndaki iliþkiyi ifade eden yapýdýr. Ecxchange ile kuyruk arasýnda baðlantý oluþturmanýn terminolojik adýdýr.
+
+Exchange birden fazla queue'ya bind olabiliyorsa eðer o halde mesajý hangi kuyruða göndereceðini route'lara göre belirler.
+
+
+
+Exchange Types
+
+- Direct Exchange
+
+Mesajlarýn direkt olarak belirli bir kuyruða gönderilmesini saðlayan exchange'dir.
+
+Mesaj , routing key'e uygun olan hedef kuyruklara gönderilir. Bunun için mesaj gönderilecek kuyruðun adýný routing key olarak belirtmek gerekir.	   
+
+- Fanout Exchange
+
+Mesajlarýn, bu exchange'e bind olmuþ olan tüm kuyruklara gönderilmesini saðlar. Publisher mesajlarýn gönderildiði kuyruk isimlerini dikkate almaz ve mesajlarý tüm kuyruklara gönderir.
+
+- Topic Exchange
+
+Routing key'leri kullanarak mesajlarý kuyruklara yönlendirmek için kullanýlan bir exchange'dir. Bu exchange ile routing key'in bir kýsmýna/formatýna/yapýsýna/yapýsýndaki keylere göre mesaj gönderilir. Kuyruklar da , routing key'e göre bu exchange'e abone olabilir ve sadece ilgili routing key'e göre gönderilen mesajlarý alabilir.
+
+- Headers Exchange	
+
+Routing key yerine header'lar üzerinden mesajlarý yönlendirmek için kullanýlan bir exchange'dir. Mesajýn header'larýna göre mesajý hangi kuyruða göndereceðini belirler. Routing key kullanýlmaz. Header'lar üzerinden eþleþme yapar.
+
+
+
+Geliþmiþ Kuyruk Mimarisi?
+
+RabbitMQ teknolojisinin ana fikri , yoðun kaynak gerektirenm iþleri hemen yapmaya koyularak tamamlanmasýný beklemek zorunda kalmaksýzýn bu iþleri ölçeklendirilebilir vaziyette daha sonra yapýlacak þekilde planlamaktýr.
+
+- Round Robin Dispatching
+
+RabbitMQ, default olarak tüm consumerlara sýrasýyla mesaj gösterir.
+1 publisherdan 1-100 arasý gelen verileri 4 farklý yerden consume edilsin bu verileri consume1'e 1 gelirken consume2 ' ye 2 gelir ... böyle devam eder.
+
+- Message Acknowledgement
+
+RabbitMQ , tüketiciye gönderdiði mesajý baþarýlý bir þekilde iþlensin veya iþlenmesin hememn kuyruktan silinmesi üzere iþaretler. 
+Tüketicilerin kuyruktan aldýklarý mesajlarý iþlemeleri sürecinde herhangi bir kesinti yahut problem durumu meydana gelirse ilgili mesaj tam olarak iþlenemeyeceði için esasýnda görev tamamlanmamýþ olacaktýr. 
+Bu taraz durumlara istinaden mesaj baþarýyla iþlendiyse eðer kuyruktan silinmesi için tükteiciden RabbitMQ'nun uyaýlmasý gerekmektedir.
+Consumer'dan , mesaj iþleminin baþarýyla sonuçlandýðýna dair dönüt alan RabbitMQ mesajý silecektir.
+
+
+- Message Durability
+
+Consumer'larýn sýkýntý yaþamasý durumunda mesajlarýn kaybolmayacaðýnýn garantisinin nasýl saðlanacaðýný message acknowledgement ile öðrenmiþ olduk. 
+Ancak RabbitMQ sunucusunun bir zevale uðramasý durumunda ne olacaðýný da düþünmemiz gerekmektedir.
+RabbitMQ'da normal þartlarda bir kapanma durumu söz konusu olursa tüm kuyruklar ve mesajlar silinecektir!
+Böyle bir durumda mesajlarýn kaybolmamasý , yani kalýcý olabilmesi için ekstradan çalýþma gerçekleþtirmemiz gerekmektedir.
+Bu çalýþma; kuyruk ve mesaj açýsýndan kalýcý olarak iþaretleme yapmamýzý gerektirmektedir.
+Publisher da konfigürasyonlar yapýlýr.
+Her ne kadar bu konfigürasyon yapýlsada olasý bir þekilde RabbitMQ sunucusunun kapanmasý durumunda mesajlarýn kaybolmamasý garanti edilemez.
+
+
+- Fair Dispatch
+
+RabbitMQ'da tüm consumer'lara eþit þekilde mesajlarý iletebilirsiniz.
+Bu da kurukta bulunan mesajlarýn , mümkün olan en adil þekilde daðýtýmýný saðlamak için kullanýlan bir özelliktir.
+Consumer'lara eþit þekilde mesajlarýn iletilmesi sistemdeki performansý düzgüzenli bir hale getirecektir. 
+Böylece bir consumer'ýn diðer consumer'lardan daha fazla yük almasý ve sistemdeki diðer consumer'larýn kýsmi aç kalmasý engellenmiþ olur.
+
+- BasicQos
+RabbitMQ'da BasicQos metodu ile mesajlarýn iþleme hýzýný ve teslimat sýrasýný belirleyebiliriz. Böylece FairDispatch özelliði konfigüre edilebilmektedir.
+
+Consumer tarafýndan BasicConsume'dan sonra kullanýlýr.
+
+channel.BasicQos(prefetchSize:0,prefetchCount:1,global:false);
+prefetchSize : Bir consumer tarafýndan alýnabilecek en büyük masj boyutunu byte cinsinden belirler. 0 sýnýrsýz demektir.
+
+prefetchCount : Bir consumer tarafýndan alýnabilecek en fazla mesaj sayýsýný belirler. 1 tek bir mesaj alýnacaðý anlamýna gelir.
+
+global : Bu konfigürasyonun tüm consumer'lar için mi yoksa sadece çaðrý yapýlan consumer için mi geçerli olacaðýný belirler.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+								    Mesaj Tasarýmlarý
+- Yaygýn Mesaj Tasarýmlarý
+
+* P2P (Point to Point) Tasarýmý
+Bu tasarýmda bir publisher ilgili mesajý direkt bir kuyruða gönderir ve bu mesaj kuyruðu iþleyen bir consumer tarafýndan tüketilir. Eðer ki senaryo gereði bir mesajýn bir tüketici tarafýndan iþlenmesi gerekiyorsa bu yaklaþým kullanýlýr.
+
+* Publish/Subscribe (Pub/Sub) Tasarýmý
+Bu tasarýmda publisher mesajý bir excchange'e gönderilir ve böylece mesaj bu exchange'e bind edilmiþ olan tüm kuyruklara yönlendirilir. Bu tasarým , bir mesajýn birçok tüketici tarafýndan iþlenmesi gerektiði durumlarda kullanýþlýdýr.
+
+* Work Queue (Ýþ Kuyruðu) Tasarýmý
+Bu tasarýmda , publisher tarafýndan yayýnlanmýþ bir mesajýn birden fazla consumer arasýndan yalnýzca biri tarafýndan tüketilmesi amaçlanmaktadýr. Böylece mesajlarýn iþlenmesi sürecinde tüm consumer'lar ayný iþ yüküne ve eþit görev daðýlýmýna sahip olacaktýr.
+
+* Request/Response Tasarýmý
+Bu tasarýmda , publisher bir request yapar gibi kuyruða mesaj gönderir ve bu mesajý tüketen consumer'dan sonuca dair baþka kuyruktan bir yanýt/response bekler. Bu tarz senaryolar için oldukça uygun bir tasarýmdýr.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ESP(Enterprise Service Bus) Nedir?
+
+ESB , servisler arasý entegrasyon saðlayan komponentlerin bütünüdür diyebiliriz.
+Yani , farklý yazýlým sistemlerinin birbirleriyle iletiþim kurmasýný saðlamak için kullanýlan bir yazýlým mimarisi ve araç setidir.
+Burada þöyle bir örnek üzerinden devam edebiliriz. RabbitMQ farklý sistemler arasýnda bir iletiþim modeli ortaya koymamýzý saðlayan teknolojidir. ESB ise, RabbitMQ gibi farklý sistemlerin birbirleriyle etkileþime girmesini teknolojilerin kullanýmýný ve yönetilebilirliðini kolaylaþtýrmakta ve buna bir ortam saðlamaktadýr.
+ESB , servisler arasý etkileþim süreçlerinde aracý uygulamalara karþýn yüksek bir abstraction görevi görmekte ve böylece bütünsel olarak sistemin tek bir teknolojiye baðýmlý olmasýný engellemektedir.
+Bu da, bu gün RabbitMQ teknolojisiyle tasarlanan bir sistemin yarýn ihtiyaç doðrultusunda Kafka vs. gibi farklý bir message broker'a geçiþini kolaylaþtýrmaktadýr.
+
+MassTransit Nedir?
+
+.Net için geliþtirilmiþ olan , distruted uygulamalarý rahatlýkla yönetmeyi ve çalýþtýrmayý amaçlayan ücretsiz , open source bir Entrprise Service Bus framework'üdür.
+
+Messaging tabanlý , gevþek baðlý (loosely coupled) ve asenkron olarak tasarlanmýþ daðýnýk sistemlerde yüksek dereceli kullanýlabilirlik, güvenilirlik ve ölçeklenebilirlik saðlayabilmek için servisler oluþturmayý oldukça kolaylaþtýrmaktadýr.
+
+MassTransit, tamamen farklý uygulamalar arasýnda message-based communication yapabilmemizi saðlayan bir transport gateway'dir.
+
+Transport Gateway , farklý sistemler arasýnda farklý iletiþim protokollerini kullanarak iletiþim kurmayý saðlayan araçtýr.
+
+MassTransit, özellikle microservisi mimarisi gibi distrubuted sistemlerin oluþturulmasý ve bu sistemlerin kendi aralarýndaki haberleþme sürecinde herhangi bir teknolojiye dair olabilecek baðýmlýlýðý soyutlamak için kullanýlan kütüphanedir.
+
+--------------------------------------------------------------------------------------------------------
+Basit Düzeyde MassTransit'in Kullanýmý 
+
+MassTransit'in kullanýlabilmesi için öncelikle iki farklý uygulamaya/servise ihtiyaç vardýr.
+Bu servisler Asp.Net Core , Worker Service vs. olabileceði gibi tipik bir console uygulamalarýda olabilirler.
