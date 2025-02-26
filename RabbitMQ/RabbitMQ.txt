@@ -70,7 +70,7 @@ Consumer'dan , mesaj iþleminin baþarýyla sonuçlandýðýna dair dönüt alan RabbitMQ
 - Message Durability
 
 Consumer'larýn sýkýntý yaþamasý durumunda mesajlarýn kaybolmayacaðýnýn garantisinin nasýl saðlanacaðýný message acknowledgement ile öðrenmiþ olduk. 
-Ancak RabbitMQ sunucusunun bir zevale uðramasý durumunda ne olacaðýný da düþünmemiz gerekmektedir.
+Ancak RabbitMQ sunucusunun bir problemle karþýlaþmasý durumunda ne olacaðýný da düþünmemiz gerekmektedir.
 RabbitMQ'da normal þartlarda bir kapanma durumu söz konusu olursa tüm kuyruklar ve mesajlar silinecektir!
 Böyle bir durumda mesajlarýn kaybolmamasý , yani kalýcý olabilmesi için ekstradan çalýþma gerçekleþtirmemiz gerekmektedir.
 Bu çalýþma; kuyruk ve mesaj açýsýndan kalýcý olarak iþaretleme yapmamýzý gerektirmektedir.
@@ -115,7 +115,7 @@ Bu tasarýmda , publisher bir request yapar gibi kuyruða mesaj gönderir ve bu mes
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-ESP(Enterprise Service Bus) Nedir?
+ESB(Enterprise Service Bus) Nedir?
 
 ESB , servisler arasý entegrasyon saðlayan komponentlerin bütünüdür diyebiliriz.
 Yani , farklý yazýlým sistemlerinin birbirleriyle iletiþim kurmasýný saðlamak için kullanýlan bir yazýlým mimarisi ve araç setidir.
@@ -125,7 +125,7 @@ Bu da, bu gün RabbitMQ teknolojisiyle tasarlanan bir sistemin yarýn ihtiyaç doðr
 
 MassTransit Nedir?
 
-.Net için geliþtirilmiþ olan , distruted uygulamalarý rahatlýkla yönetmeyi ve çalýþtýrmayý amaçlayan ücretsiz , open source bir Entrprise Service Bus framework'üdür.
+.Net için geliþtirilmiþ olan , distruted uygulamalarý rahatlýkla yönetmeyi ve çalýþtýrmayý amaçlayan ücretsiz , open source bir Enterprise Service Bus framework'üdür.
 
 Messaging tabanlý , gevþek baðlý (loosely coupled) ve asenkron olarak tasarlanmýþ daðýnýk sistemlerde yüksek dereceli kullanýlabilirlik, güvenilirlik ve ölçeklenebilirlik saðlayabilmek için servisler oluþturmayý oldukça kolaylaþtýrmaktadýr.
 
